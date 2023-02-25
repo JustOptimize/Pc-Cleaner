@@ -63,10 +63,6 @@
       "item": "%userprofile%\\advanced_ip_scanner_Comments"
     },
     {
-      "item": "%userprofile%\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\",
-      "type": "REMOVESELF"
-    },
-    {
       "item": "%userprofile%\\AppData\\Roaming\\Notepad++\\config.xml"
     },
     {
@@ -78,10 +74,6 @@
     },
     {
       "item": "%userprofile%\\Creative Cloud Files\\",
-      "type": "REMOVESELF"
-    },
-    {
-      "item": "%userprofile%\\Favorites\\",
       "type": "REMOVESELF"
     },
     {
@@ -111,7 +103,7 @@
     }
   ],
 
-  "services": ["EventLog", "seclogon", "CryptSvc", "SysMain"],
+  "services": [],
 
   "regKeys": [
     "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU",
@@ -124,5 +116,5 @@
   ],
 
   "cleanJournals": true,
-  "restartPc": true
+  "restartPc": false
 }
