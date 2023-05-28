@@ -5,13 +5,21 @@ import os
 import shutil
 import winreg
 import json
-import glob
 import sys
 import subprocess
 
+# Example launch command: python cleanUp.py -s -p config.json
+
 # Load config file
 try:
-    with open("config.json") as f:
+    # Get config file path
+    # There needs to be -p "path" in the launch command
+    if "-p" in sys.argv:
+        configPath = sys.argv[sys.argv.index("-p") + 1]
+    else:
+        configPath = "config.json"
+        
+    with open(configPath) as f:
         config = json.load(f)
 except FileNotFoundError:
     print("Error: Config file not found")
@@ -20,8 +28,19 @@ except json.JSONDecodeError:
     print("Error: Invalid config file")
     sys.exit(1)
 
+skipPrompts = False
+
+# Get launch arguments
+if len(sys.argv) > 1:
+    # If has -s argument, skip prompts
+    if "-s" in sys.argv:
+        skipPrompts = True
+
 # Stop services
-prompt = input("Do you want to stop services? (y/n) ")
+if not skipPrompts:
+    prompt = input("Do you want to stop services? (y/n) ")
+else:
+    prompt = 'y'
 
 if prompt.lower() == 'y':
     print("Stopping services...")
@@ -35,8 +54,33 @@ if prompt.lower() == 'y':
 else:
     print("Skipping service stop.")
 
+# Stop executables
+if not skipPrompts:
+    prompt = input("Do you want to stop executables? (y/n) ")
+else:
+    prompt = 'y'
+
+if prompt.lower() == 'y':
+    print("Stopping executables...")
+    for executable in config["executables"]:
+        # Add .exe to the end of the executable if it doesn't already have it
+        if not executable.endswith(".exe"):
+            executable += ".exe"
+            
+        try:
+            print(f"Stopping {executable}...")
+            subprocess.call(["taskkill", "/f", "/im", executable], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print(f"{executable} stopped.")
+        except subprocess.CalledProcessError:
+            print(f"Error: Failed to stop {executable}")
+else:
+    print("Skipping executable stop.")
+
 # Delete files
-prompt = input("Do you want to delete files? (y/n) ")
+if not skipPrompts:
+    prompt = input("Do you want to delete files? (y/n) ")
+else:
+    prompt = 'n' # Don't delete files by default
 
 if prompt.lower() == 'y':
     print("Scanning for files to delete...")
@@ -114,7 +158,10 @@ else:
     print("Skipping file delete.")
 
 # Delete registry keys
-prompt = input("Do you want to delete registry keys? (y/n) ")
+if not skipPrompts:
+    prompt = input("Do you want to delete registry keys? (y/n) ")
+else:
+    prompt = 'y'
 
 if prompt.lower() == 'y':
     print("Deleting registry keys...")
@@ -146,7 +193,10 @@ else:
     print("Skipping registry key delete.")
 
 # Clean event logs
-prompt = input("Do you want to clean event logs? (y/n) ")
+if not skipPrompts:
+    prompt = input("Do you want to clean event logs? (y/n) ")
+else:
+    prompt = 'y'
 
 if prompt.lower() == 'y':
     print("Cleaning event logs...")
@@ -160,8 +210,11 @@ else:
     print("Skipping event log cleaning.")
     
 # Restart PC
-prompt = input("Do you want to restart the PC? (y/n) ")
-
+if not skipPrompts:
+    prompt = input("Do you want to restart the PC? (y/n) ")
+else:
+    prompt = 'n'
+    
 if prompt.lower() == 'y':
     try:
         subprocess.call(["shutdown", "/r", "/t", "0"])
